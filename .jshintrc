@@ -1,3 +1,6 @@
 {
-	"undef": true
+	"undef": true,
+	"globals": {
+		"window": false
+	}
 }

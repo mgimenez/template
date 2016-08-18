@@ -10,6 +10,11 @@ var gulp = require('gulp'),
     jshint = require('gulp-jshint');
     stylish = require('jshint-stylish'),
     clean = require('gulp-clean'),
+    uglify = require('gulp-uglify'),
+    pump = require('pump'),
+    htmlreplace = require('gulp-html-replace'),
+    runSequence = require('run-sequence'),
+    color = require('gulp-color'),
     path = {
       src: './src',
     	dist: './dist',
@@ -32,11 +37,14 @@ gulp.task('sass', function () {
 });
 
 // Copy HTML Files
-gulp.task('copy', function() {
+gulp.task('copyHtml', function() {
   gulp.src(path.src + '/**/*.html')
     .pipe(copy())
     .pipe(gulp.dest(path.dist));
+});
 
+// Copy JS Files
+gulp.task('copyJs', function() {
   gulp.src(path.js + '/**/*.js')
     .pipe(copy())
     .pipe(gulp.dest(path.dist + '/js'));
@@ -45,16 +53,45 @@ gulp.task('copy', function() {
 // Watches for SCSS, HTML, JS Files
 gulp.task('watch', function () {
     gulp.watch(path.scss + '/**/*.scss', ['sass']);
-    gulp.watch([path.src + '/**/*.html', path.src + '/**/*.js'], ['copy']);
-    gulp.watch(path.js + '/**/*.js', ['hint']);
+    gulp.watch(path.src + '/**/*.html', ['copyHtml']);
+    gulp.watch(path.src + '/**/*.js', ['hintJs', 'copyJs']);
 });
 
 
 // JS HINT
-gulp.task('hint', function() {
+gulp.task('hintJs', function() {
   return gulp.src(path.js + '/**/*.js')
     .pipe(jshint())
     .pipe(jshint.reporter(stylish));
+});
+
+// Concat JS
+gulp.task('concatJs', function (cb) {
+  pump([
+        gulp.src(path.js + '/**/*.js'),
+        concat('app.js'),
+        gulp.dest(path.dist + '/js')
+    ],
+    cb);
+});
+
+// Uglify JS
+gulp.task('uglifyJs', function (cb) {
+  pump([
+        gulp.src(path.dist + '/js/*.js'),
+        uglify(),
+        gulp.dest(path.dist + '/js')
+    ],
+    cb);
+});
+
+// Merge Script tags
+gulp.task('mergeScript', function () {
+    gulp.src(path.src + '/**/*.html')
+        .pipe(htmlreplace({
+            'js': 'app.js'
+        }))
+        .pipe(gulp.dest(path.dist));
 });
 
 // Remove files
@@ -71,5 +108,22 @@ gulp.task('connect', function() {
   });
 });
 
-gulp.task('build', ['clean', 'sass', 'copy']);
-gulp.task('dev', ['build', 'watch', 'connect']);
+
+
+gulp.task('dist', function() {
+  runSequence('clean', 'sass', 'hintJs', 'copyJs', 'copyHtml', function() {
+    console.log(color('SUCCESSFULLY DIST!', 'YELLOW'));
+  });
+});
+
+gulp.task('dev', function(callback) {
+  runSequence('clean', 'sass', 'hintJs', 'copyJs', 'copyHtml', 'watch', 'connect', function() {
+    console.log(color('HAPPY DEV!', 'BLUE'));
+  });
+});
+
+gulp.task('build', function(callback) {
+  runSequence('clean', 'sass', 'hintJs', 'concatJs', 'uglifyJs', 'mergeScript', function() {
+    console.log(color('SUCCESSFULLY BUILD!', 'YELLOW'));
+  });
+});
