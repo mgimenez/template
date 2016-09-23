@@ -15,6 +15,7 @@ var gulp = require('gulp'),
     htmlreplace = require('gulp-html-replace'),
     runSequence = require('run-sequence'),
     color = require('gulp-color'),
+    imagemin = require('gulp-imagemin'),
     path = {
       src: './src',
     	dist: './dist',
@@ -48,6 +49,12 @@ gulp.task('copyJs', function() {
   gulp.src(path.js + '/**/*.js')
     .pipe(copy())
     .pipe(gulp.dest(path.dist + '/js'));
+});
+
+gulp.task('imagemin', function() {
+    gulp.src(path.src + '/images/*')
+        .pipe(imagemin())
+        .pipe(gulp.dest(path.dist + '/images'))
 });
 
 // Watches for SCSS, HTML, JS Files
@@ -111,19 +118,19 @@ gulp.task('connect', function() {
 
 
 gulp.task('dist', function() {
-  runSequence('clean', 'sass', 'hintJs', 'copyJs', 'copyHtml', function() {
+  runSequence('clean', 'sass', 'hintJs', 'copyJs', 'copyHtml', 'imagemin', function() {
     console.log(color('SUCCESSFULLY DIST!', 'YELLOW'));
   });
 });
 
 gulp.task('dev', function(callback) {
-  runSequence('clean', 'sass', 'hintJs', 'copyJs', 'copyHtml', 'watch', 'connect', function() {
+  runSequence('clean', 'sass', 'hintJs', 'copyJs', 'copyHtml', 'imagemin', 'watch', 'connect', function() {
     console.log(color('HAPPY DEV!', 'BLUE'));
   });
 });
 
 gulp.task('build', function(callback) {
-  runSequence('clean', 'sass', 'hintJs', 'concatJs', 'uglifyJs', 'mergeScript', function() {
+  runSequence('clean', 'sass', 'hintJs', 'concatJs', 'uglifyJs', 'imagemin', 'mergeScript', function() {
     console.log(color('SUCCESSFULLY BUILD!', 'YELLOW'));
   });
 });
