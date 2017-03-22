@@ -32,10 +32,12 @@ Generates distribution files to develop, watches files and run local webserver
     - Watches SCSS files from source directory and runs SCSS task
     - Watches HTML files from source directory and runs copyHtml task
     - Watches Javascript files from source directory and runs copyJs task
-  - **connect**: Create a local server form dist directory
+    - Watches PUG/TPUG files from source directory and runs pug-watch task
+  - **pug-watch**: Runs pug and pugTemplates tasks then browserSync.reload();
+  - **browser-sync**: Creates a local server form dist directory and keep updated the browser to any change 
     - default protocol: http
     - default hostname: localhost
-    - default port: 9001
+    - default port: 3000
 
 ## gulp build
 Generates distribution files to production environment
