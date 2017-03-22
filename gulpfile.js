@@ -16,6 +16,7 @@ var gulp = require('gulp'),
     runSequence = require('run-sequence'),
     color = require('gulp-color'),
     imagemin = require('gulp-imagemin'),
+		autoprefixer = require('gulp-autoprefixer'),
     path = {
       src: './src',
     	dist: './dist',
@@ -32,6 +33,9 @@ gulp.task('sass', function () {
     return gulp.src(path.scss + '/styles.scss')
     .pipe(sass({outputStyle: 'expanded'}).on('error', sass.logError))
     .pipe(concat('styles.css'))
+		.pipe(autoprefixer({
+        browsers: ['> 0.1%']
+    }))
     .pipe(cleanCSS())
     .pipe(gulp.dest(path.dist + '/css'))
     .pipe(connect.reload());
