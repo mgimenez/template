@@ -8,7 +8,7 @@ Generates distribution files to develop
   Runs 
   - **clean**: Cleans all files into distribution directory
   - **sass**: Generates CSS files from SCSS files from source directory to distribution directory
-	- **autoprefixer**: Adds CSS vendor prefixes for browsers > 0.1% according with [BrowserList](http://browserl.ist/) 
+    - **autoprefixer**: Adds CSS vendor prefixes for browsers > 0.1% according with [BrowserList](http://browserl.ist/) 
   - **hintJs**: JSHint Validate Javascript files from source directory and report on the terminal window
   - **copyJs**: Copies Javascirpt files from source directory to distribution directory
 	- **copyVendor**: Copies vendor files from source directory to distribution directory
@@ -21,7 +21,7 @@ Generates distribution files to develop, watches files and run local webserver
   Runs 
   - **clean**: Cleans all files into distribution directory
   - **sass**: Generates CSS files from SCSS files from source directory to distribution directory
-  - **autoprefixer**: Adds CSS vendor prefixes for browsers > 0.1% according with [BrowserList](http://browserl.ist/) 
+    - **autoprefixer**: Adds CSS vendor prefixes for browsers > 0.1% according with [BrowserList](http://browserl.ist/) 
   - **hintJs**: JSHint Validate Javascript files from source directory and report on the terminal window
   - **copyJs**: Copies Javascirpt files from source directory to distribution directory
   - **copyVendor**: Copies vendor files from source directory to distribution directory
@@ -42,7 +42,7 @@ Generates distribution files to production environment
   Runs 
   - **clean**: Cleans all files into distribution directory
   - **sass**: Generates CSS files from SCSS files from source directory to distribution directory
-	- **autoprefixer**: Adds CSS vendor prefixes for browsers > 0.1% according with [BrowserList](http://browserl.ist/) 
+    - **autoprefixer**: Adds CSS vendor prefixes for browsers > 0.1% according with [BrowserList](http://browserl.ist/) 
   - **hintJs**: JSHint Validate Javascript files from source directory and report on the terminal window
 	- **copyVendor**: Copies vendor files from source directory to distribution directory
   - **pug**: Generates HTML from PUG files
