@@ -16,7 +16,10 @@ var gulp = require('gulp'),
     runSequence = require('run-sequence'),
     color = require('gulp-color'),
     imagemin = require('gulp-imagemin'),
+		pug = require('gulp-pug'),
+    pugConcat = require('gulp-pug-template-concat'),
 		autoprefixer = require('gulp-autoprefixer'),
+		browserSync = require('browser-sync').create(),
     path = {
       src: './src',
     	dist: './dist',
@@ -38,7 +41,8 @@ gulp.task('sass', function () {
     }))
     .pipe(cleanCSS())
     .pipe(gulp.dest(path.dist + '/css'))
-    .pipe(connect.reload());
+    .pipe(connect.reload())
+		.pipe(browserSync.stream());
 });
 
 // Copy HTML Files
@@ -55,6 +59,14 @@ gulp.task('copyJs', function() {
     .pipe(gulp.dest(path.dist + '/js'));
 });
 
+// Copy vendor Files
+gulp.task('copyVendor', function() {
+  gulp.src(path.src + '/vendor/**/*')
+    .pipe(copy())
+    .pipe(gulp.dest(path.dist + '/vendor'));
+});
+
+
 gulp.task('imagemin', function() {
     gulp.src(path.src + '/images/*')
         .pipe(imagemin())
@@ -65,7 +77,9 @@ gulp.task('imagemin', function() {
 gulp.task('watch', function () {
     gulp.watch(path.scss + '/**/*.scss', ['sass']);
     gulp.watch(path.src + '/**/*.html', ['copyHtml']);
-    gulp.watch(path.src + '/**/*.js', ['hintJs', 'copyJs']);
+    gulp.watch(path.src + '/**/*.js', ['js-watch']);
+		gulp.watch(path.src + '/pug/**/*.pug', ['pug-watch']);
+    gulp.watch(path.src + '/pug/templates/*.tpug', ['pug-watch']);
 });
 
 
@@ -86,6 +100,11 @@ gulp.task('concatJs', function (cb) {
     cb);
 });
 
+gulp.task('js-watch', ['hintJs', 'concatJs'], function (done) {
+    browserSync.reload();
+    done();
+});
+
 // Uglify JS
 gulp.task('uglifyJs', function (cb) {
   pump([
@@ -94,6 +113,37 @@ gulp.task('uglifyJs', function (cb) {
         gulp.dest(path.dist + '/js')
     ],
     cb);
+});
+
+// Process PUG files
+gulp.task('pug', function () {
+  return gulp.src([path.src + '/pug/*.pug', path.src + '/pug/views/*.pug'])
+  .pipe(pug({
+    pretty: true
+  }))
+  .on('error', function (error) {
+    console.log('An error occurred while compiling jade.\nLook in the console for details.\n' + error);
+    this.emit('end');
+  })
+  .pipe(gulp.dest(path.dist));
+});
+
+gulp.task("pugTemplates", function(){
+  gulp.src(path.src + '/pug/templates/*.tpug')
+    .pipe(pug({
+        client: true
+    }))
+    .pipe(pugConcat('templates.js', {templateVariable:"templates"}))
+    .on('error', function (error) {
+        console.log('An error occurred while compiling jade.\nLook in the console for details.\n' + error);
+        this.emit('end');
+    })
+    .pipe(gulp.dest(path.dist + '/js'))
+});
+
+gulp.task('pug-watch', ['pug', 'pugTemplates'], function (done) {
+    browserSync.reload();
+    done();
 });
 
 // Merge Script tags
@@ -111,6 +161,15 @@ gulp.task('clean', function () {
     .pipe(clean());
 });
 
+//Browser Sync & Server
+gulp.task('browser-sync', function() {
+    browserSync.init({
+        server: {
+            baseDir: "./dist"
+        }
+    });
+});
+
 // Server
 gulp.task('connect', function() {
   connect.server({
@@ -122,19 +181,19 @@ gulp.task('connect', function() {
 
 
 gulp.task('dist', function() {
-  runSequence('clean', 'sass', 'hintJs', 'copyJs', 'copyHtml', 'imagemin', function() {
+  runSequence('clean', 'sass', 'hintJs', 'copyJs', 'copyVendor', 'pugTemplates', 'pug', 'imagemin', function() {
     console.log(color('SUCCESSFULLY DIST!', 'YELLOW'));
   });
 });
 
 gulp.task('dev', function(callback) {
-  runSequence('clean', 'sass', 'hintJs', 'copyJs', 'copyHtml', 'imagemin', 'watch', 'connect', function() {
+  runSequence('clean', 'sass', 'hintJs', 'copyJs', 'copyVendor', 'pugTemplates', 'pug', 'imagemin', 'watch', 'connect', 'browser-sync', function() {
     console.log(color('HAPPY DEV!', 'BLUE'));
   });
 });
 
 gulp.task('build', function(callback) {
-  runSequence('clean', 'sass', 'hintJs', 'concatJs', 'uglifyJs', 'imagemin', 'mergeScript', function() {
+  runSequence('clean', 'sass', 'hintJs', 'pugTemplates', 'pug', 'concatJs', 'uglifyJs', 'imagemin', 'mergeScript', function() {
     console.log(color('SUCCESSFULLY BUILD!', 'YELLOW'));
   });
 });
